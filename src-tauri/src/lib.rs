@@ -137,3 +137,134 @@ pub fn run() {
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_window_position_default() {
+        let settings = Settings::default();
+        assert_eq!(settings.window_position.x, 100);
+        assert_eq!(settings.window_position.y, 100);
+    }
+
+    #[test]
+    fn test_window_size_default() {
+        let settings = Settings::default();
+        assert_eq!(settings.window_size.width, 200);
+        assert_eq!(settings.window_size.height, 200);
+    }
+
+    #[test]
+    fn test_animation_speed_default() {
+        let settings = Settings::default();
+        assert_eq!(settings.animation_speed, 200);
+        assert!(settings.animation_speed >= 50 && settings.animation_speed <= 500);
+    }
+
+    #[test]
+    fn test_opacity_default() {
+        let settings = Settings::default();
+        assert_eq!(settings.opacity, 1.0);
+        assert!(settings.opacity >= 0.0 && settings.opacity <= 1.0);
+    }
+
+    #[test]
+    fn test_always_on_top_default() {
+        let settings = Settings::default();
+        assert_eq!(settings.always_on_top, true);
+    }
+
+    #[test]
+    fn test_image_paths_default() {
+        let settings = Settings::default();
+        assert_eq!(settings.images.typing1, "");
+        assert_eq!(settings.images.typing2, "");
+        assert_eq!(settings.images.idle, "");
+    }
+
+    #[test]
+    fn test_settings_serialization() {
+        let settings = Settings::default();
+        let json = serde_json::to_string(&settings).unwrap();
+        assert!(json.contains("windowPosition"));
+        assert!(json.contains("windowSize"));
+        assert!(json.contains("animationSpeed"));
+        assert!(json.contains("alwaysOnTop"));
+    }
+
+    #[test]
+    fn test_settings_deserialization() {
+        let json = r#"{
+            "windowPosition": {"x": 150, "y": 250},
+            "windowSize": {"width": 300, "height": 300},
+            "animationSpeed": 150,
+            "images": {"typing1": "path1.png", "typing2": "path2.png", "idle": "idle.png"},
+            "opacity": 0.8,
+            "alwaysOnTop": false
+        }"#;
+
+        let settings: Settings = serde_json::from_str(json).unwrap();
+        assert_eq!(settings.window_position.x, 150);
+        assert_eq!(settings.window_position.y, 250);
+        assert_eq!(settings.window_size.width, 300);
+        assert_eq!(settings.window_size.height, 300);
+        assert_eq!(settings.animation_speed, 150);
+        assert_eq!(settings.images.typing1, "path1.png");
+        assert_eq!(settings.images.typing2, "path2.png");
+        assert_eq!(settings.images.idle, "idle.png");
+        assert_eq!(settings.opacity, 0.8);
+        assert_eq!(settings.always_on_top, false);
+    }
+
+    #[test]
+    fn test_settings_round_trip() {
+        let original = Settings {
+            window_position: WindowPosition { x: 123, y: 456 },
+            window_size: WindowSize { width: 250, height: 250 },
+            animation_speed: 100,
+            images: ImagePaths {
+                typing1: "test1.png".to_string(),
+                typing2: "test2.png".to_string(),
+                idle: "idle.png".to_string(),
+            },
+            opacity: 0.5,
+            always_on_top: false,
+        };
+
+        let json = serde_json::to_string(&original).unwrap();
+        let deserialized: Settings = serde_json::from_str(&json).unwrap();
+
+        assert_eq!(original.window_position.x, deserialized.window_position.x);
+        assert_eq!(original.window_position.y, deserialized.window_position.y);
+        assert_eq!(original.window_size.width, deserialized.window_size.width);
+        assert_eq!(original.window_size.height, deserialized.window_size.height);
+        assert_eq!(original.animation_speed, deserialized.animation_speed);
+        assert_eq!(original.images.typing1, deserialized.images.typing1);
+        assert_eq!(original.images.typing2, deserialized.images.typing2);
+        assert_eq!(original.images.idle, deserialized.images.idle);
+        assert_eq!(original.opacity, deserialized.opacity);
+        assert_eq!(original.always_on_top, deserialized.always_on_top);
+    }
+
+    #[test]
+    fn test_animation_speed_range_validation() {
+        // アニメーション速度が仕様の範囲内であることを確認
+        let min_speed = 50;
+        let max_speed = 500;
+        let default_speed = Settings::default().animation_speed;
+
+        assert!(default_speed >= min_speed, "Default animation speed should be >= {}", min_speed);
+        assert!(default_speed <= max_speed, "Default animation speed should be <= {}", max_speed);
+    }
+
+    #[test]
+    fn test_opacity_range_validation() {
+        // 透明度が0.0-1.0の範囲内であることを確認
+        let default_opacity = Settings::default().opacity;
+
+        assert!(default_opacity >= 0.0, "Default opacity should be >= 0.0");
+        assert!(default_opacity <= 1.0, "Default opacity should be <= 1.0");
+    }
+}

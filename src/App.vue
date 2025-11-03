@@ -16,6 +16,10 @@ async function greet() {
   <main class="container">
     <h1>Welcome to Tauri + Vue</h1>
     <p>
+      Color Picker:
+      <ColorPicker v-model="color" />
+    </p>
+    <p>
       Selected Color: {{ color }}
     </p>
 
@@ -51,6 +55,7 @@ async function greet() {
   font-weight: 400;
 
   color: #0f0f0f;
+  background-color: #dddddd;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;

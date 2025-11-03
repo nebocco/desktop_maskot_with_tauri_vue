@@ -12,9 +12,15 @@
   "app": {
     "windows": [
       {
-        "title": "Desktop Maskot with Tauri & Vue",
-        "width": 800,
-        "height": 600
+        "label": "main",
+        "title": "Desktop Mascot",
+        "width": 200,
+        "height": 200,
+        "transparent": true,
+        "decorations": false,
+        "alwaysOnTop": true,
+        "resizable": false,
+        "skipTaskbar": true
       }
     ],
     "security": {
